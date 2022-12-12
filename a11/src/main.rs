@@ -8,81 +8,49 @@ use std::io::BufRead;
 #[derive(Clone, Debug)]
 enum Operation {
     Squared,
-    Plus(u32),
-    Mult(u32),
-}
-
-#[derive(Clone, Debug)]
-struct Item {
-    base: u32,
-    testee: u32,
+    Plus(u64),
+    Mult(u64),
 }
 
 #[derive(Debug)]
 struct Monkey {
-    items: Vec<Item>,
+    items: Vec<u64>,
     operation: Operation,
     test: u32,
     throw: (usize, usize),
-    inspections: u32
+    inspections: u32,
 }
 
+const LCM: u64 = 9699690;
+
 impl Monkey {
-    fn inspect(&mut self) -> Vec<(usize, Vec<Item>)> {
+    fn inspect(&mut self) -> Vec<(usize, Vec<u64>)> {
         let mut throws = vec![];
         let mut throw_t = vec![];
         let mut throw_f = vec![];
 
         for item in &self.items {
-            let mut item_base = item.base;
-            let mut item_testee = item.testee;
-            let mut new_item = Item {
-                base: item_base,
-                testee: item_testee,
-            };
-
+            let mut new_item = *item;
             match self.operation {
                 Operation::Squared => {
-                    new_item.testee *= item.testee;
+                    new_item *= new_item;
                 }
                 Operation::Plus(v) => {
-                    new_item.testee += v;
+                    new_item += v;
                 }
                 Operation::Mult(v) => {
-                    new_item.testee *= v;
+                    new_item *= v;
                 }
             }
 
-            new_item.testee = (new_item.testee as f32 / 3f32).floor() as u32;
-            // reduction
-            // - get the test numbers, for now just hardcode 23,13,19,17
-            // let mut reduced = 1;
-            // if new_item % 13 == 0 {
-            //     reduced *= 13;
-            // }
-            //
-            // if new_item % 17 == 0 {
-            //     reduced *= 17;
-            // }
-            //
-            // if new_item % 19 == 0 {
-            //     reduced *= 19;
-            // }
-            //
-            // if new_item % 23 == 0 {
-            //     reduced *= 23;
-            // }
-            //
-            // if reduced == 1 {
-            //     reduced = new_item;
-            // }
+            // new_item.testee = (new_item.testee as f32 / 3f32).floor() as u32;
+            // reduction for part 2
+            new_item %= LCM;
 
-            let reduced = new_item;
-
-            if reduced.testee % self.test == 0 {
-                throw_t.push(reduced.clone());
+            if new_item % self.test as u64 == 0 {
+                throw_t.push(new_item);
             } else {
-                throw_f.push(reduced.clone());
+                throw_f.push(new_item);
             }
 
             self.inspections += 1;
@@ -124,7 +92,14 @@ fn main() -> Result<(), io::Error> {
             Ok(line) => {
                 if regex_monkey.is_match(&line) {
                     let prev_monkey = current_monkey;
-                    current_monkey = regex_monkey.captures(&line).unwrap().get(1).unwrap().as_str().parse::<u32>().unwrap();
+                    current_monkey = regex_monkey
+                        .captures(&line)
+                        .unwrap()
+                        .get(1)
+                        .unwrap()
+                        .as_str()
+                        .parse::<u32>()
+                        .unwrap();
 
                     if current_monkey != prev_monkey {
                         let op = operation.clone();
@@ -138,43 +113,89 @@ fn main() -> Result<(), io::Error> {
                         });
                     }
                 } else if regex_starting_items.is_match(&line) {
-                    let starting_items_str = regex_starting_items.captures(&line).unwrap().get(1).unwrap().as_str();
-                    starting_items = starting_items_str.split(", ").map(|v| {
-                        let base = v.parse::<u32>().unwrap();
-                        Item {
-                            base,
-                            testee: base,
-                        }
-                    }).collect::<Vec<Item>>();
+                    let starting_items_str = regex_starting_items
+                        .captures(&line)
+                        .unwrap()
+                        .get(1)
+                        .unwrap()
+                        .as_str();
+                    starting_items = starting_items_str
+                        .split(", ")
+                        .map(|v| v.parse::<u64>().unwrap())
+                        .collect::<Vec<u64>>();
                 } else if regex_operation.is_match(&line) {
-                    let op = regex_operation.captures(&line).unwrap().get(1).unwrap().as_str();
+                    let op = regex_operation
+                        .captures(&line)
+                        .unwrap()
+                        .get(1)
+                        .unwrap()
+                        .as_str();
                     if op == "old * old" {
                         operation = Operation::Squared;
-                    } else if regex_operation_plus.is_match(&op) {
-                        operation = Operation::Plus(regex_operation_plus.captures(&op).unwrap().get(1).unwrap().as_str().parse::<u32>().unwrap());
-                    } else if regex_operation_mult.is_match(&op) {
-                        operation = Operation::Mult(regex_operation_mult.captures(&op).unwrap().get(1).unwrap().as_str().parse::<u32>().unwrap());
+                    } else if regex_operation_plus.is_match(op) {
+                        operation = Operation::Plus(
+                            regex_operation_plus
+                                .captures(op)
+                                .unwrap()
+                                .get(1)
+                                .unwrap()
+                                .as_str()
+                                .parse::<u64>()
+                                .unwrap(),
+                        );
+                    } else if regex_operation_mult.is_match(op) {
+                        operation = Operation::Mult(
+                            regex_operation_mult
+                                .captures(op)
+                                .unwrap()
+                                .get(1)
+                                .unwrap()
+                                .as_str()
+                                .parse::<u64>()
+                                .unwrap(),
+                        );
                     }
                 } else if regex_test.is_match(&line) {
-                    test = regex_test.captures(&line).unwrap().get(1).unwrap().as_str().parse::<u32>().unwrap();
+                    test = regex_test
+                        .captures(&line)
+                        .unwrap()
+                        .get(1)
+                        .unwrap()
+                        .as_str()
+                        .parse::<u32>()
+                        .unwrap();
 
                     if !tests.contains(&test) {
                         tests.push(test);
                     }
                 } else if regex_if_true.is_match(&line) {
-                    throw.0 = regex_if_true.captures(&line).unwrap().get(1).unwrap().as_str().parse::<usize>().unwrap();
+                    throw.0 = regex_if_true
+                        .captures(&line)
+                        .unwrap()
+                        .get(1)
+                        .unwrap()
+                        .as_str()
+                        .parse::<usize>()
+                        .unwrap();
                 } else if regex_if_false.is_match(&line) {
-                    throw.1 = regex_if_false.captures(&line).unwrap().get(1).unwrap().as_str().parse::<usize>().unwrap();
+                    throw.1 = regex_if_false
+                        .captures(&line)
+                        .unwrap()
+                        .get(1)
+                        .unwrap()
+                        .as_str()
+                        .parse::<usize>()
+                        .unwrap();
                 }
             }
             Err(_) => break,
         }
     }
 
-    let op = operation.clone();
+    let op = operation;
 
     monkeys.push(Monkey {
-        items: starting_items.clone(),
+        items: starting_items,
         operation: op,
         test,
         throw,
@@ -183,7 +204,7 @@ fn main() -> Result<(), io::Error> {
 
     // println!("{:#?}", tests);
 
-    for _round in 0..20u8 {
+    for _round in 0..10000 {
         for i in 0..monkeys.len() {
             let throws = monkeys[i].inspect();
             for throw in throws {
@@ -195,13 +216,14 @@ fn main() -> Result<(), io::Error> {
 
     println!("{:#?}", monkeys);
 
-    monkeys.sort_by(|a, b| {
-        a.inspections.cmp(&b.inspections)
-    });
+    monkeys.sort_by(|a, b| a.inspections.cmp(&b.inspections));
 
     monkeys.reverse();
 
-    println!("Part 1: {}", monkeys[0].inspections * monkeys[1].inspections);
+    println!(
+        "Part 2: {} * {}",
+        monkeys[0].inspections, monkeys[1].inspections
+    );
 
     Ok(())
 }
