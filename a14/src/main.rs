@@ -28,7 +28,7 @@ fn main() -> Result<(), io::Error> {
                 }
 
                 walls.push(wall);
-            },
+            }
             Err(_) => break,
         }
     }
@@ -68,7 +68,11 @@ fn main() -> Result<(), io::Error> {
     Ok(())
 }
 
-fn check_collision(point: &(i32, i32), walls: &Vec<Vec<(i32, i32)>>, grains: &Vec<(i32, i32)>) -> bool {
+fn check_collision(
+    point: &(i32, i32),
+    walls: &Vec<Vec<(i32, i32)>>,
+    grains: &[(i32, i32)],
+) -> bool {
     if grains.contains(point) {
         return true;
     }
@@ -96,7 +100,6 @@ fn check_collision(point: &(i32, i32), walls: &Vec<Vec<(i32, i32)>>, grains: &Ve
                 } else if point.0 <= start.0 && point.0 >= end.0 {
                     return true;
                 }
-
             }
         }
     }
@@ -111,12 +114,8 @@ mod tests {
     #[test]
     fn collisions() {
         let walls = vec![
-            vec![
-                (498,4), (498,6), (496,6),
-            ],
-            vec![
-                (503,4), (502,4), (502,9), (494,9),
-            ]
+            vec![(498, 4), (498, 6), (496, 6)],
+            vec![(503, 4), (502, 4), (502, 9), (494, 9)],
         ];
 
         let grains = vec![];
