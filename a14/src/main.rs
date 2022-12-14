@@ -33,16 +33,24 @@ fn main() -> Result<(), io::Error> {
         }
     }
 
-    println!("{:#?}", walls);
+    let floor = 2 + lowest_point;
 
     let mut count = 1;
     let mut current = starting_point;
     loop {
-        if current.1 > lowest_point {
+        // if current.1 > lowest_point {
+        //     break;
+        // }
+
+        if check_collision(&current, &vec![], &grains) {
             break;
         }
 
-        if !check_collision(&(current.0, current.1 + 1), &walls, &grains) {
+        if current.1 + 1 == floor {
+            count += 1;
+            grains.push(current);
+            current = starting_point;
+        } else if !check_collision(&(current.0, current.1 + 1), &walls, &grains) {
             // down
             current.1 += 1;
         } else if !check_collision(&(current.0 - 1, current.1 + 1), &walls, &grains) {
@@ -59,11 +67,9 @@ fn main() -> Result<(), io::Error> {
             grains.push(current);
             current = starting_point;
         }
-
-        // println!("{:?}", current);
     }
 
-    println!("Part 1: {}", count - 1); // the last one fell down
+    println!("Part 2: {}", count - 1); // the last one fell down
 
     Ok(())
 }
