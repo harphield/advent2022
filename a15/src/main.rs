@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use regex::Regex;
+use std::collections::HashSet;
 use std::fs::File;
 use std::io;
 use std::io::BufRead;
@@ -18,7 +18,8 @@ struct Point {
 fn main() -> Result<(), io::Error> {
     let file = File::open("input.txt")?;
 
-    let rx = Regex::new(r"^Sensor at x=(.+), y=(.+): closest beacon is at x=(.+), y=(.+)$").unwrap();
+    let rx =
+        Regex::new(r"^Sensor at x=(.+), y=(.+): closest beacon is at x=(.+), y=(.+)$").unwrap();
 
     let mut beacons_on_row = HashSet::new();
 
@@ -38,18 +39,12 @@ fn main() -> Result<(), io::Error> {
                     beacons_on_row.insert(b_x);
                 }
 
-                let start = Point {
-                    x: s_x,
-                    y: s_y
-                };
+                let start = Point { x: s_x, y: s_y };
 
-                let distance = manhattan(&start, &Point {
-                    x: b_x,
-                    y: b_y
-                });
+                let distance = manhattan(&start, &Point { x: b_x, y: b_y });
 
                 match get_collision_points_with_row(&start, distance, SEARCH_ROW) {
-                    None => {},
+                    None => {}
                     Some(points) => {
                         if points.len() == 2 {
                             for i in points[0].x..=points[1].x {
@@ -76,8 +71,8 @@ fn main() -> Result<(), io::Error> {
 }
 
 fn abs_difference<T>(x: T, y: T) -> T
-    where
-        T: Sub<Output = T> + Ord,
+where
+    T: Sub<Output = T> + Ord,
 {
     if x < y {
         y - x
@@ -90,12 +85,8 @@ fn manhattan(a: &Point, b: &Point) -> i64 {
     abs_difference(b.x, a.x) + abs_difference(b.y, a.y)
 }
 
-fn get_collision_points_with_row(start: &Point, distance: i64, y: i64) -> Option<Vec<Point>>
-{
-    let direct_up = Point {
-        x: start.x,
-        y
-    };
+fn get_collision_points_with_row(start: &Point, distance: i64, y: i64) -> Option<Vec<Point>> {
+    let direct_up = Point { x: start.x, y };
 
     let distance_to_row = manhattan(&start, &direct_up);
 
@@ -111,13 +102,10 @@ fn get_collision_points_with_row(start: &Point, distance: i64, y: i64) -> Option
         // 2 points, pythagoras to the rescue
         let x = (distance - distance_to_row).abs();
 
-        return Some(vec![Point {
-            x: start.x - x,
-            y
-        }, Point {
-            x: start.x + x,
-            y
-        }])
+        return Some(vec![
+            Point { x: start.x - x, y },
+            Point { x: start.x + x, y },
+        ]);
     }
 
     None
@@ -129,14 +117,8 @@ mod tests {
 
     #[test]
     fn reverse_manhattan() {
-        let a = Point {
-            x: 8,
-            y: 7
-        };
-        let b = Point {
-            x: 2,
-            y: 10
-        };
+        let a = Point { x: 8, y: 7 };
+        let b = Point { x: 2, y: 10 };
 
         let distance = manhattan(&a, &b);
 
@@ -147,14 +129,8 @@ mod tests {
 
     #[test]
     fn reverse_manhattan_2() {
-        let a = Point {
-            x: 0,
-            y: 11
-        };
-        let b = Point {
-            x: 2,
-            y: 10
-        };
+        let a = Point { x: 0, y: 11 };
+        let b = Point { x: 2, y: 10 };
 
         let distance = manhattan(&a, &b);
 
