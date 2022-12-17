@@ -12,6 +12,8 @@ struct Valve {
 
 type ValveHolder = HashMap<String, Valve>;
 
+const MINUTES: u32 = 30;
+
 fn main() -> Result<(), io::Error> {
     let file = File::open("input.txt")?;
 
@@ -112,7 +114,7 @@ fn permutations(
             continue;
         }
 
-        if minute + neighbor.1 > 30 {
+        if minute + neighbor.1 > MINUTES {
             values.push(order_to_pressure(opened, valves));
             continue;
         }
@@ -157,9 +159,9 @@ fn order_to_pressure(order: &[&String], valves: &ValveHolder) -> u32 {
             .first()
             .unwrap();
 
-        if minutes + travel_time > 30 {
+        if minutes + travel_time > MINUTES {
             // stop here
-            pressure += (minutes + travel_time - 30) * rate;
+            pressure += (minutes + travel_time - MINUTES) * rate;
             break;
         }
 
@@ -172,12 +174,8 @@ fn order_to_pressure(order: &[&String], valves: &ValveHolder) -> u32 {
         c_v = n_v;
     }
 
-    // println!("pressure released now: {}", pressure);
-    // println!("final rate: {}", rate);
-    // println!("minutes left: {}", 30 - minutes);
-
     // minutes left waiting
-    pressure += rate * (30 - minutes);
+    pressure += rate * (MINUTES - minutes);
 
     pressure
 }
