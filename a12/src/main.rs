@@ -215,40 +215,14 @@ fn astar(
             {
                 // This path to neighbor is better than any previous one. Record it!
                 // cameFrom[neighbor] := current
-                match came_from.entry(*neighbor) {
-                    Entry::Occupied(entry) => {
-                        entry.remove();
-                        came_from.insert(*neighbor, current);
-                    }
-                    Entry::Vacant(entry) => {
-                        entry.insert(current);
-                    }
-                }
+                came_from.insert(*neighbor, current);
 
-                match g_score.entry(*neighbor) {
-                    Entry::Occupied(entry) => {
-                        entry.remove();
-                        g_score.insert(*neighbor, tentative_g_score);
-                    }
-                    Entry::Vacant(entry) => {
-                        entry.insert(tentative_g_score);
-                    }
-                }
+                g_score.insert(*neighbor, tentative_g_score);
 
-                match f_score.entry(*neighbor) {
-                    Entry::Occupied(entry) => {
-                        entry.remove();
-                        f_score.insert(
-                            *neighbor,
-                            tentative_g_score + heur(neighbor, goal, grid_width, grid_height),
-                        );
-                    }
-                    Entry::Vacant(entry) => {
-                        entry.insert(
-                            tentative_g_score + heur(neighbor, goal, grid_width, grid_height),
-                        );
-                    }
-                }
+                f_score.insert(
+                    *neighbor,
+                    tentative_g_score + heur(neighbor, goal, grid_width, grid_height),
+                );
 
                 if !open_set.contains(neighbor) {
                     open_set.push(*neighbor);
