@@ -7,7 +7,7 @@ const START_OFFSET_Y: u32 = 3;
 struct Rock {
     width: u32,
     height: u32,
-    pixels: Vec<bool>
+    pixels: Vec<bool>,
 }
 
 fn main() {
@@ -16,45 +16,31 @@ fn main() {
         Rock {
             width: 4,
             height: 1,
-            pixels: vec![
-                true, true, true, true,
-            ],
+            pixels: vec![true, true, true, true],
         },
         // +
         Rock {
             width: 3,
             height: 3,
-            pixels: vec![
-                false, true, false,
-                true, true, true,
-                false, true, false,
-            ],
+            pixels: vec![false, true, false, true, true, true, false, true, false],
         },
         // _|
         Rock {
             width: 3,
             height: 3,
-            pixels: vec![
-                true, true, true,
-                false, false, true,
-                false, false, true,
-            ],
+            pixels: vec![true, true, true, false, false, true, false, false, true],
         },
         // |
         Rock {
             width: 1,
             height: 4,
-            pixels: vec![
-                true, true, true, true,
-            ],
+            pixels: vec![true, true, true, true],
         },
         // []
         Rock {
             width: 2,
             height: 2,
-            pixels: vec![
-                true, true, true, true,
-            ],
+            pixels: vec![true, true, true, true],
         },
     ];
 
@@ -74,18 +60,34 @@ fn main() {
         // blowing
         if inputs::INPUT[jet_shot] {
             // right
-            if !collision(&(rock_position.0 + 1, rock_position.1), &current_rock, &rows) {
+            if !collision(
+                &(rock_position.0 + 1, rock_position.1),
+                current_rock,
+                &rows,
+            ) {
                 rock_position.0 += 1;
             }
         } else {
             // left
-            if rock_position.0 > 0 && !collision(&(rock_position.0 - 1, rock_position.1), &current_rock, &rows) {
+            if rock_position.0 > 0
+                && !collision(
+                    &(rock_position.0 - 1, rock_position.1),
+                    current_rock,
+                    &rows,
+                )
+            {
                 rock_position.0 -= 1;
             }
         }
 
         // falling
-        if rock_position.1 > 0 && !collision(&(rock_position.0, rock_position.1 - 1), &current_rock, &rows) {
+        if rock_position.1 > 0
+            && !collision(
+                &(rock_position.0, rock_position.1 - 1),
+                current_rock,
+                &rows,
+            )
+        {
             rock_position.1 -= 1;
         } else {
             // stopped!
@@ -95,7 +97,7 @@ fn main() {
                 break;
             }
 
-            add_rock_to_rows(&rock_position, &current_rock, &mut rows);
+            add_rock_to_rows(&rock_position, current_rock, &mut rows);
 
             rock_type += 1;
             if rock_type > 4 {
@@ -103,7 +105,10 @@ fn main() {
             }
 
             current_rock = &rocks[rock_type];
-            rock_position = (START_OFFSET_X, get_highest_pixel(&rows) + START_OFFSET_Y + 1);
+            rock_position = (
+                START_OFFSET_X,
+                get_highest_pixel(&rows) + START_OFFSET_Y + 1,
+            );
 
             add_empty_rows(current_rock.height, &mut rows);
         }
@@ -115,7 +120,6 @@ fn main() {
     }
 
     println!("Part 1: {}", get_highest_pixel(&rows) + 1);
-
 }
 
 fn render(rock_coords: &(u32, u32), rock: &Rock, rows: &Vec<[bool; WIDTH]>) {
@@ -160,7 +164,7 @@ fn add_empty_rows(count: u32, rows: &mut Vec<[bool; WIDTH]>) {
     }
 }
 
-fn add_rock_to_rows(coords: &(u32, u32), rock: &Rock, rows: &mut Vec<[bool; WIDTH]>) {
+fn add_rock_to_rows(coords: &(u32, u32), rock: &Rock, rows: &mut [[bool; WIDTH]]) {
     for (i, p) in rock.pixels.iter().enumerate() {
         if !p {
             continue;
@@ -173,7 +177,7 @@ fn add_rock_to_rows(coords: &(u32, u32), rock: &Rock, rows: &mut Vec<[bool; WIDT
     }
 }
 
-fn collision(coords: &(u32, u32), rock: &Rock, rows: &Vec<[bool; WIDTH]>) -> bool {
+fn collision(coords: &(u32, u32), rock: &Rock, rows: &[[bool; WIDTH]]) -> bool {
     for (i, p) in rock.pixels.iter().enumerate() {
         if !p {
             continue;
@@ -205,4 +209,3 @@ fn get_highest_pixel(rows: &Vec<[bool; WIDTH]>) -> u32 {
 
     0
 }
-
